@@ -23,7 +23,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = "false"
 
 # COMMAND ----------
 
@@ -40,6 +40,15 @@ file_path = f"{DA.paths.datasets}/airbnb/sf-listings/sf-listings-2019-03-06.csv"
 raw_df = spark.read.csv(file_path, header="true", inferSchema="true", multiLine="true", escape='"')
 
 display(raw_df)
+
+# COMMAND ----------
+
+raw_df.filter(col("price") == 0).count()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC So now seems after rewrite the dataset (as in the end, the data is processed), no row with price as 0
 
 # COMMAND ----------
 

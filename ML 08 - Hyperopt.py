@@ -38,7 +38,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = 'false'
 
 # COMMAND ----------
 
@@ -170,6 +170,14 @@ best_hyperparam = fmin(fn=objective_function,
                        max_evals=num_evals,
                        trials=trials,
                        rstate=np.random.default_rng(42))
+
+
+
+# COMMAND ----------
+
+best_hyperparam
+
+# COMMAND ----------
 
 # Retrain model on train & validation dataset and evaluate on test dataset
 with mlflow.start_run():

@@ -102,7 +102,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinsall = 'false'
 
 # COMMAND ----------
 
@@ -116,6 +116,10 @@
 
 spark_df = spark.read.parquet(f"{DA.paths.datasets}/airbnb/sf-listings/sf-listings-2019-03-06-clean.parquet/")
 display(spark_df)
+
+# COMMAND ----------
+
+type(spark_df)
 
 # COMMAND ----------
 
@@ -134,6 +138,10 @@ pandas_df.head()
 
 # COMMAND ----------
 
+type(pandas_df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="e75a3ba6-98f6-4b39-aecb-345109cb2ce9"/>
 # MAGIC 
 # MAGIC 
@@ -148,6 +156,10 @@ import pyspark.pandas as ps
 
 df = ps.read_parquet(f"{DA.paths.datasets}/airbnb/sf-listings/sf-listings-2019-03-06-clean.parquet/")
 df.head()
+
+# COMMAND ----------
+
+type(df)
 
 # COMMAND ----------
 
@@ -188,6 +200,10 @@ display(df)
 
 # COMMAND ----------
 
+type(df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="a41480c7-1787-4bd6-a4c3-c85552a5f762"/>
 # MAGIC 
 # MAGIC 
@@ -198,6 +214,10 @@ display(df)
 
 df = spark_df.to_pandas_on_spark()
 display(df)
+
+# COMMAND ----------
+
+type(df)
 
 # COMMAND ----------
 
@@ -226,6 +246,10 @@ display(df.to_spark())
 # MAGIC 
 # MAGIC 
 # MAGIC Get value counts of the different property types with PySpark
+
+# COMMAND ----------
+
+type(spark_df)
 
 # COMMAND ----------
 

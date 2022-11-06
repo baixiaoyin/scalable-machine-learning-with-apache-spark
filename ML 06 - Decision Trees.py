@@ -22,7 +22,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = 'false'
 
 # COMMAND ----------
 
@@ -109,7 +109,7 @@ stages = [string_indexer, vec_assembler, dt]
 pipeline = Pipeline(stages=stages)
 
 # Uncomment to perform fit
-# pipeline_model = pipeline.fit(train_df)
+pipeline_model = pipeline.fit(train_df)
 
 # COMMAND ----------
 

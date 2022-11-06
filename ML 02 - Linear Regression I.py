@@ -7,6 +7,14 @@
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC XY Notes:
+# MAGIC 1. The end to end ML 
+# MAGIC 2. Key is the vector assembler, Spark need every input features to be vector rather than double, integer...etc..
+# MAGIC 3. Still, a blocker is: for the repartipation of the df to simulate the multi-nodes cluster, seems not working
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="62811f6d-e550-4c60-8903-f38d7ed56ca7"/>
 # MAGIC 
 # MAGIC 
@@ -21,7 +29,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = "false"
 
 # COMMAND ----------
 
@@ -60,6 +68,42 @@ train_repartition_df, test_repartition_df = (airbnb_df
                                              .randomSplit([.8, .2], seed=42))
 
 print(train_repartition_df.count())
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### How to get around the above problem, meaning when we do the repartition, the row number is still the same?
+
+# COMMAND ----------
+
+airbnb_df_cached = airbnb_df.cache()
+
+# COMMAND ----------
+
+train_repartition_df, test_repartition_df = (airbnb_df_cached
+                                             .repartition(24)
+                                             .randomSplit([.8, .2], seed=42))
+
+print(train_repartition_df.count())
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC Seems it is not working ... 
+# MAGIC Let's change to cache the train_repartition_df data
+
+# COMMAND ----------
+
+train_repartition_df, test_repartition_df = (airbnb_df.cache()
+                                             .repartition(24)
+                                             .randomSplit([.8, .2], seed=42))
+
+print(train_repartition_df.cache().count())
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ###　Seems still not working !!!
 
 # COMMAND ----------
 
@@ -104,7 +148,7 @@ from pyspark.ml.regression import LinearRegression
 lr = LinearRegression(featuresCol="bedrooms", labelCol="price")
 
 # Uncomment when running
-# lr_model = lr.fit(train_df)
+lr_model = lr.fit(train_df)
 
 # COMMAND ----------
 
@@ -127,6 +171,10 @@ from pyspark.ml.feature import VectorAssembler
 vec_assembler = VectorAssembler(inputCols=["bedrooms"], outputCol="features")
 
 vec_train_df = vec_assembler.transform(train_df)
+
+# COMMAND ----------
+
+vec_train_df.printSchema()
 
 # COMMAND ----------
 

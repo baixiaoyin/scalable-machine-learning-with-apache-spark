@@ -22,7 +22,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = 'false'
 
 # COMMAND ----------
 
@@ -69,6 +69,20 @@ categorical_cols = [field for (field, dataType) in train_df.dtypes if dataType =
 index_output_cols = [x + "Index" for x in categorical_cols]
 ohe_output_cols = [x + "OHE" for x in categorical_cols]
 
+# COMMAND ----------
+
+categorical_cols
+
+# COMMAND ----------
+
+index_output_cols
+
+# COMMAND ----------
+
+ohe_output_cols
+
+# COMMAND ----------
+
 string_indexer = StringIndexer(inputCols=categorical_cols, outputCols=index_output_cols, handleInvalid="skip")
 ohe_encoder = OneHotEncoder(inputCols=index_output_cols, outputCols=ohe_output_cols)
 
@@ -89,6 +103,14 @@ from pyspark.ml.feature import VectorAssembler
 numeric_cols = [field for (field, dataType) in train_df.dtypes if ((dataType == "double") & (field != "price"))]
 assembler_inputs = ohe_output_cols + numeric_cols
 vec_assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features")
+
+# COMMAND ----------
+
+numeric_cols
+
+# COMMAND ----------
+
+airbnb_df.printSchema()
 
 # COMMAND ----------
 
@@ -201,6 +223,32 @@ print(f"R2 is {r2}")
 # MAGIC 
 # MAGIC 
 # MAGIC As you can see, our RMSE decreased when compared to the model without one-hot encoding, and the R2 increased as well!
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC XY: Further explore how to use the components in the pipeline seperately
+
+# COMMAND ----------
+
+string_model = string_indexer.fit(train_df)
+
+# COMMAND ----------
+
+df_try_1 = string_model.transform(train_df)
+
+# COMMAND ----------
+
+df_try_1.printSchema()
+
+# COMMAND ----------
+
+encoder_model = ohe_encoder.fit(df_try_1)
+df_try_2 = encoder_model.transform(df_try_1)
+
+# COMMAND ----------
+
+df_try_2.printSchema()
 
 # COMMAND ----------
 

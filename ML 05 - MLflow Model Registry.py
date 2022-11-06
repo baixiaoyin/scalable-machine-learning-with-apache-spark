@@ -26,7 +26,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = "false"
 
 # COMMAND ----------
 
@@ -358,6 +358,10 @@ new_model_version = max([model_version_info.version for model_version_info in mo
 
 # COMMAND ----------
 
+new_model_version
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="4fb5d7c9-b0c0-49d5-a313-ac95da7e0f91"/>
 # MAGIC 
 # MAGIC 
@@ -419,6 +423,14 @@ client.delete_model_version(
 client.transition_model_version_stage(
     name=model_name,
     version=2,
+    stage="Archived"
+)
+
+# COMMAND ----------
+
+client.transition_model_version_stage(
+    name=model_name,
+    version=3,
     stage="Archived"
 )
 

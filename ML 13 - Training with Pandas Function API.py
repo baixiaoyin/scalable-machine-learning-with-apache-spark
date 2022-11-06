@@ -20,7 +20,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run ./Includes/Classroom-Setup
+# MAGIC %run ./Includes/Classroom-Setup $reinstsall = 'false'
 
 # COMMAND ----------
 
@@ -50,6 +50,10 @@ df = (spark
      )
 
 display(df)
+
+# COMMAND ----------
+
+type(df)
 
 # COMMAND ----------
 
@@ -145,6 +149,10 @@ display(combined_df)
 
 # COMMAND ----------
 
+display(model_directories_df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="3f660cc6-4979-48dd-beea-9dab9b536230"/>
 # MAGIC 
 # MAGIC 
@@ -201,6 +209,18 @@ model_df = (spark.read.format("mlflow-experiment")
             .filter("tags.device IS NOT NULL")
             .orderBy("end_time", ascending=False)
             .select("tags.device", "run_id")
+            .limit(10))
+
+display(model_df)
+
+# COMMAND ----------
+
+experiment_id = run.info.experiment_id
+
+model_df = (spark.read.format("mlflow-experiment")
+            .load(experiment_id)
+            .filter("tags.device IS NOT NULL")
+            .orderBy("end_time", ascending=False)
             .limit(10))
 
 display(model_df)

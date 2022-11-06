@@ -21,7 +21,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./Includes/Classroom-Setup"
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = 'false'
 
 # COMMAND ----------
 
@@ -190,9 +190,18 @@ list(zip(cv_model.getEstimatorParamMaps(), cv_model.avgMetrics))
 
 # COMMAND ----------
 
+pred_df = cv_model.transform(test_df)
+
+rmse = evaluator.setMetricName("rmse").evaluate(pred_df)
+r2 = evaluator.setMetricName("r2").evaluate(pred_df)
+print(f"RMSE is {rmse}")
+print(f"R2 is {r2}")
+
+# COMMAND ----------
+
 pred_df = pipeline_model.transform(test_df)
 
-rmse = evaluator.evaluate(pred_df)
+rmse = evaluator.setMetricName("rmse").evaluate(pred_df)
 r2 = evaluator.setMetricName("r2").evaluate(pred_df)
 print(f"RMSE is {rmse}")
 print(f"R2 is {r2}")
