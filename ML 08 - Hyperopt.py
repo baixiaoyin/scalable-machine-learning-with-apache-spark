@@ -179,6 +179,16 @@ best_hyperparam
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Regarding to trials, please see the line of code below or <br> 
+# MAGIC http://hyperopt.github.io/hyperopt/getting-started/minimizing_functions/#the-trials-object
+
+# COMMAND ----------
+
+trials.trials
+
+# COMMAND ----------
+
 # Retrain model on train & validation dataset and evaluate on test dataset
 with mlflow.start_run():
     best_max_depth = best_hyperparam["max_depth"]

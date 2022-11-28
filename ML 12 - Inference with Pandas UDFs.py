@@ -62,6 +62,10 @@ spark_df = spark.createDataFrame(X_test)
 
 # COMMAND ----------
 
+type(spark_df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="1cdc4475-f55f-4126-9d38-dedb19577f4e"/>
 # MAGIC 
 # MAGIC 
@@ -90,10 +94,29 @@ def predict(*args: pd.Series) -> pd.Series:
     model_path = f"runs:/{run.info.run_id}/model" 
     model = mlflow.sklearn.load_model(model_path) # Load model
     pdf = pd.concat(args, axis=1)
+    print(type(pdf))
     return pd.Series(model.predict(pdf))
 
 prediction_df = spark_df.withColumn("prediction", predict(*spark_df.columns))
 display(prediction_df)
+
+# COMMAND ----------
+
+df = pd.read_csv(f"{DA.paths.datasets}/airbnb/sf-listings/airbnb-cleaned-mlflow.csv".replace("dbfs:/", "/dbfs/")).drop(["zipcode"], axis=1)
+
+# COMMAND ----------
+
+@pandas_udf("double")
+def testtest(*args: pd.Series) -> pd.Series:
+    model_path = f"runs:/{run.info.run_id}/model" 
+    model = mlflow.sklearn.load_model(model_path) # Load model
+    pdf = pd.concat(args, axis=1)
+    print(type(pdf))
+#     return pd.Series(model.predict(pdf))
+    return pdf
+
+print(type(testtest(*df.columns)))
+testtest(*df.columns)
 
 # COMMAND ----------
 

@@ -51,8 +51,7 @@ airbnb_df = spark.read.format("delta").load(file_path)
 # COMMAND ----------
 
 ### Train test split
-train_df, test_df = airbnb_df.randomSplit([.8, .2], seed=42)
-print(train_df.cache().count())
+
 
 # COMMAND ----------
 
@@ -64,11 +63,8 @@ print(train_df.cache().count())
 
 # COMMAND ----------
 
-train_repartition_df, test_repartition_df = (airbnb_df
-                                             .repartition(24)
-                                             .randomSplit([.8, .2], seed=42))
-
-print(train_repartition_df.count())
+### Use repartition for randomSplit to simulate different cluster configuration
+### This will not impact the rest of the code
 
 # COMMAND ----------
 
@@ -77,34 +73,8 @@ print(train_repartition_df.count())
 
 # COMMAND ----------
 
-airbnb_df_cached = airbnb_df.cache()
-
-# COMMAND ----------
-
-train_repartition_df, test_repartition_df = (airbnb_df_cached
-                                             .repartition(24)
-                                             .randomSplit([.8, .2], seed=42))
-
-print(train_repartition_df.count())
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC Seems it is not working ... 
-# MAGIC Let's change to cache the train_repartition_df data
-
-# COMMAND ----------
-
-train_repartition_df, test_repartition_df = (airbnb_df.cache()
-                                             .repartition(24)
-                                             .randomSplit([.8, .2], seed=42))
-
-print(train_repartition_df.cache().count())
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ###　Seems still not working !!!
+### Cache the data
+airbnb_df_cached = ???
 
 # COMMAND ----------
 
@@ -120,15 +90,8 @@ print(train_repartition_df.cache().count())
 
 # COMMAND ----------
 
-display(train_df.select("price", "bedrooms"))
+### display onle "price" and "bedrooms"
 
-# COMMAND ----------
-
-display(train_df.select("price", "bedrooms").summary())
-
-# COMMAND ----------
-
-display(train_df)
 
 # COMMAND ----------
 
@@ -144,12 +107,7 @@ display(train_df)
 
 # COMMAND ----------
 
-from pyspark.ml.regression import LinearRegression
 
-lr = LinearRegression(featuresCol="bedrooms", labelCol="price")
-
-# Uncomment when running
-lr_model = lr.fit(train_df)
 
 # COMMAND ----------
 
@@ -167,20 +125,21 @@ lr_model = lr.fit(train_df)
 
 # COMMAND ----------
 
-from pyspark.ml.feature import VectorAssembler
+### Import VectorAssembler and transfor only "bedrooms" to 
+from xxx import xxx
 
-vec_assembler = VectorAssembler(inputCols=["bedrooms"], outputCol="features")
+vec_assembler = xxx
 
-vec_train_df = vec_assembler.transform(train_df)
-
-# COMMAND ----------
-
-vec_train_df.printSchema()
+vec_train_df = xxx
 
 # COMMAND ----------
 
-lr = LinearRegression(featuresCol="features", labelCol="price")
-lr_model = lr.fit(vec_train_df)
+### Build a lr model 
+from pyspark.ml.xxx import xxx
+
+lr = xxx
+lr_model = xxx
+
 
 # COMMAND ----------
 
@@ -192,8 +151,9 @@ lr_model = lr.fit(vec_train_df)
 
 # COMMAND ----------
 
-m = lr_model.coefficients[0]
-b = lr_model.intercept
+### Check the coefficients and intercept
+m = lr_model.xxx
+b = lr_model.xxx
 
 print(f"The formula for the linear regression line is y = {m:.2f}x + {b:.2f}")
 
@@ -207,11 +167,11 @@ print(f"The formula for the linear regression line is y = {m:.2f}x + {b:.2f}")
 
 # COMMAND ----------
 
-vec_test_df = vec_assembler.transform(test_df)
+### predict the test dataset 
+vec_test_df = xxx
 
-pred_df = lr_model.transform(vec_test_df)
+pred_df = xxx
 
-pred_df.select("bedrooms", "features", "price", "prediction").show()
 
 # COMMAND ----------
 
@@ -229,11 +189,12 @@ display(pred_df)
 
 # COMMAND ----------
 
-from pyspark.ml.evaluation import RegressionEvaluator
+### Import the suitable evaluator and print out the rmse
+from pyspark.ml.xxx import xxx
 
-regression_evaluator = RegressionEvaluator(predictionCol="prediction", labelCol="price", metricName="rmse")
+regression_evaluator = xxx
 
-rmse = regression_evaluator.evaluate(pred_df)
+rmse = regression_evaluator.xxx(pred_df)
 print(f"RMSE is {rmse}")
 
 # COMMAND ----------
