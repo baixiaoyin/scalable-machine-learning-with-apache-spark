@@ -50,6 +50,10 @@ with mlflow.start_run(run_name="sklearn-random-forest") as run:
 
 # COMMAND ----------
 
+
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="7ebcaaf9-c6f5-4c92-865a-c7f2c7afb555"/>
 # MAGIC 
 # MAGIC 
@@ -58,6 +62,7 @@ with mlflow.start_run(run_name="sklearn-random-forest") as run:
 
 # COMMAND ----------
 
+### !!! How to transform a Pandas DataFrame to spark DataFrame 
 spark_df = spark.createDataFrame(X_test)
 
 # COMMAND ----------
@@ -87,11 +92,31 @@ type(spark_df)
 
 # COMMAND ----------
 
+### If you would like to retrain a model, use the second line of the code, if you want to use an existing model, use the first line
+run_id = '32de9d4a7c904404aff40555f786bfac'
+# run_id = run.info.run_id
+
+# COMMAND ----------
+
+### Only run this when you are not going to retrain the model
+
+import mlflow.sklearn
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv(f"{DA.paths.datasets}/airbnb/sf-listings/airbnb-cleaned-mlflow.csv".replace("dbfs:/", "/dbfs/")).drop(["zipcode"], axis=1)
+X_train, X_test, y_train, y_test = train_test_split(df.drop(["price"], axis=1), df[["price"]].values.ravel(), random_state=42)
+
+spark_df = spark.createDataFrame(X_test)
+
+# COMMAND ----------
+
 from pyspark.sql.functions import pandas_udf
 
 @pandas_udf("double")
 def predict(*args: pd.Series) -> pd.Series:
-    model_path = f"runs:/{run.info.run_id}/model" 
+    model_path = f"runs:/{run_id}/model" 
     model = mlflow.sklearn.load_model(model_path) # Load model
     pdf = pd.concat(args, axis=1)
     print(type(pdf))
@@ -99,6 +124,10 @@ def predict(*args: pd.Series) -> pd.Series:
 
 prediction_df = spark_df.withColumn("prediction", predict(*spark_df.columns))
 display(prediction_df)
+
+# COMMAND ----------
+
+type(prediction_df)
 
 # COMMAND ----------
 
@@ -146,7 +175,7 @@ from typing import Iterator, Tuple
 
 @pandas_udf("double")
 def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.Series]:
-    model_path = f"runs:/{run.info.run_id}/model" 
+    model_path = f"runs:/{run_id}/model" 
     model = mlflow.sklearn.load_model(model_path) # Load model
     for features in iterator:
         pdf = pd.concat(features, axis=1)
@@ -170,12 +199,26 @@ display(prediction_df)
 # COMMAND ----------
 
 def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.DataFrame]:
-    model_path = f"runs:/{run.info.run_id}/model" 
+    model_path = f"runs:/{run_id}/model" 
     model = mlflow.sklearn.load_model(model_path) # Load model
     for features in iterator:
         yield pd.concat([features, pd.Series(model.predict(features), name="prediction")], axis=1)
-    
-display(spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`neighbourhood_cleansed` BIGINT,`latitude` DOUBLE,`longitude` DOUBLE,`property_type` BIGINT,`room_type` BIGINT,`accommodates` DOUBLE,`bathrooms` DOUBLE,`bedrooms` DOUBLE,`beds` DOUBLE,`bed_type` BIGINT,`minimum_nights` DOUBLE,`number_of_reviews` DOUBLE,`review_scores_rating` DOUBLE,`review_scores_accuracy` DOUBLE,`review_scores_cleanliness` DOUBLE,`review_scores_checkin` DOUBLE,`review_scores_communication` DOUBLE,`review_scores_location` DOUBLE,`review_scores_value` DOUBLE, `prediction` DOUBLE""")) 
+
+result_map_df = spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`neighbourhood_cleansed` BIGINT,`latitude` DOUBLE,`longitude` DOUBLE,`property_type` BIGINT,`room_type` BIGINT,`accommodates` DOUBLE,`bathrooms` DOUBLE,`bedrooms` DOUBLE,`beds` DOUBLE,`bed_type` BIGINT,`minimum_nights` DOUBLE,`number_of_reviews` DOUBLE,`review_scores_rating` DOUBLE,`review_scores_accuracy` DOUBLE,`review_scores_cleanliness` DOUBLE,`review_scores_checkin` DOUBLE,`review_scores_communication` DOUBLE,`review_scores_location` DOUBLE,`review_scores_value` DOUBLE, `prediction` DOUBLE""")
+
+display(result_map_df) 
+
+# COMMAND ----------
+
+type(result_map_df)
+
+# COMMAND ----------
+
+type(spark_df)
+
+# COMMAND ----------
+
+# display(spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`neighbourhood_cleansed` BIGINT,`latitude` DOUBLE,`longitude` DOUBLE,`property_type` BIGINT,`room_type` BIGINT,`accommodates` DOUBLE,`bathrooms` DOUBLE,`bedrooms` DOUBLE,`beds` DOUBLE,`bed_type` BIGINT,`minimum_nights` DOUBLE,`number_of_reviews` DOUBLE,`review_scores_rating` DOUBLE,`review_scores_accuracy` DOUBLE,`review_scores_cleanliness` DOUBLE,`review_scores_checkin` DOUBLE,`review_scores_communication` DOUBLE,`review_scores_location` DOUBLE,`review_scores_value` DOUBLE, `prediction` DOUBLE""")) 
 
 # COMMAND ----------
 
@@ -190,7 +233,7 @@ display(spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`nei
 from pyspark.sql.functions import lit
 from pyspark.sql.types import DoubleType
 
-schema = spark_df.withColumn("prediction", lit(None).cast(DoubleType())).schema
+schema = spark_df.withColumn("prediction", lit(None).cast(DoubleType())).schema ### This is to add a column "prediction" with all None and case to double, so that you don't need to type in all schema as the example above
 display(spark_df.mapInPandas(predict, schema)) 
 
 # COMMAND ----------

@@ -53,16 +53,9 @@
 
 # MAGIC %md
 # MAGIC 
-# MAGIC %md <i18n value="68fcecd4-2280-411c-94c1-3e111683c6a3"/>
-# MAGIC 
-# MAGIC 
 # MAGIC <div style="img align: center; line-height: 0; padding-top: 9px;">
-# MAGIC   <img src="C:/Users/xiaobai/OneDrive%20-%20Capgemini/Pictures/Screenshots/DeltavsPaquet.PNG" width="500"/>
+# MAGIC   <img src="https://dbc-b24345e8-120e.cloud.databricks.com/?o=3101139743428265#files/3075548951183145" width="500"/>
 # MAGIC </div>
-# MAGIC 
-# MAGIC At a glance, Delta Lake is an open source storage layer that brings both **reliability and performance** to data lakes. Delta Lake provides ACID transactions, scalable metadata handling, and unifies streaming and batch data processing. 
-# MAGIC 
-# MAGIC Delta Lake runs on top of your existing data lake and is fully compatible with Apache Spark APIs. <a href="https://docs.databricks.com/delta/delta-intro.html" target="_blank">For more information </a>
 
 # COMMAND ----------
 
@@ -120,6 +113,13 @@ spark.sql(f"CREATE DATABASE IF NOT EXISTS {DA.cleaned_username}")
 spark.sql(f"USE {DA.cleaned_username}")
 
 airbnb_df.write.format("delta").mode("overwrite").saveAsTable("delta_review")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC I assume the above one is to:
+# MAGIC 1. creat a database spark.sql(f"CREATE DATABASE IF NOT EXISTS {DA.cleaned_username}")
+# MAGIC 2. and tell the system that I am working this database spark.sql(f"USE {DA.cleaned_username}")
 
 # COMMAND ----------
 
