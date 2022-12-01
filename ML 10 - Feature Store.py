@@ -72,7 +72,11 @@ print(table_name)
 
 # COMMAND ----------
 
-table_name = "xiaoyin_bai.airbnb_44f67e"
+table_name
+
+# COMMAND ----------
+
+table_name = "xiaoyin_bai.airbnb_195e70"
 
 # COMMAND ----------
 
@@ -582,6 +586,22 @@ display(predictions_df)
 from databricks import feature_store
 fs = feature_store.FeatureStoreClient()
 # help(fs.create_table)
+
+# COMMAND ----------
+
+table_name = "xiaoyin_bai.airbnb_195e70"
+
+# COMMAND ----------
+
+fs.get_table(table_name).description
+
+# COMMAND ----------
+
+fs.get_table(table_name)
+
+# COMMAND ----------
+
+display(fs.read_table(table_name))
 
 # COMMAND ----------
 
