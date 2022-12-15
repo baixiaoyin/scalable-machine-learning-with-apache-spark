@@ -48,6 +48,25 @@ pipeline = Pipeline(stages=stages)
 
 # COMMAND ----------
 
+### Just train without CV
+pipeline_model = pipeline.fit(train_df)
+
+# COMMAND ----------
+
+from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.ml.tuning import CrossValidator
+
+evaluator = RegressionEvaluator(labelCol="price", predictionCol="prediction")
+
+pred_df = pipeline_model.transform(test_df)
+
+rmse = evaluator.setMetricName("rmse").evaluate(pred_df)
+r2 = evaluator.setMetricName("r2").evaluate(pred_df)
+print(f"RMSE is {rmse}")
+print(f"R2 is {r2}")
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="4561938e-90b5-413c-9e25-ef15ba40e99c"/>
 # MAGIC 
 # MAGIC 

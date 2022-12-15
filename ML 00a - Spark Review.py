@@ -47,6 +47,10 @@ df = (spark.range(1, 1000000)
 
 # COMMAND ----------
 
+type(df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="a0c6912d-a8d6-449b-a3ab-5ca91c7f9805"/>
 # MAGIC 
 # MAGIC 
@@ -56,6 +60,31 @@ df = (spark.range(1, 1000000)
 # COMMAND ----------
 
 display(df.sample(.001))
+
+# COMMAND ----------
+
+df.show(10)
+
+# COMMAND ----------
+
+df2 = (spark.range(1, 1000000))
+display(df2.sample(.001))
+
+# COMMAND ----------
+
+df2.show(10)
+
+# COMMAND ----------
+
+df3 = (spark.range(1, 1000000).withColumn("id", (col("id") / 1000).cast("integer")))
+display(df3.sample(.001))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC From here, what I can observe is: <br>
+# MAGIC 1.spark.range is to create a spark.dataframe.Dataframe <br>
+# MAGIC 2.it natually comes with an column id, which starts from 1 and it is ascending <br>
 
 # COMMAND ----------
 
@@ -70,6 +99,10 @@ display(df.sample(.001))
 # COMMAND ----------
 
 df.createOrReplaceTempView("df_temp")
+
+# COMMAND ----------
+
+type(df_temp)
 
 # COMMAND ----------
 
@@ -134,6 +167,20 @@ df.count()
 
 # COMMAND ----------
 
+df.storageLevel
+
+# COMMAND ----------
+
+df.is_cached
+
+# COMMAND ----------
+
+### unchased a dataframe
+df.unpersist()
+df.is_cached
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="ce238b9e-fee4-4644-9469-b7d9910f6243"/>
 # MAGIC 
 # MAGIC 
@@ -146,7 +193,15 @@ df.count()
 
 # COMMAND ----------
 
-df.limit(10).toPandas()
+df_pd = df.limit(10).toPandas()
+
+# COMMAND ----------
+
+type(df_pd)
+
+# COMMAND ----------
+
+df_pd
 
 # COMMAND ----------
 

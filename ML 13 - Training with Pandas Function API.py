@@ -66,6 +66,7 @@ type(df)
 # COMMAND ----------
 
 train_return_schema = "device_id integer, n_used integer, model_path string, mse float"
+# train_return_schema = "device_id integer, n_used integer, model_path string, mse float, run_id string"
 
 # COMMAND ----------
 
@@ -118,6 +119,8 @@ def train_model(df_pandas: pd.DataFrame) -> pd.DataFrame:
             # Create a return pandas DataFrame that matches the schema above
             return_df = pd.DataFrame([[device_id, n_used, artifact_uri, mse]], 
                                     columns=["device_id", "n_used", "model_path", "mse"])
+#             return_df = pd.DataFrame([[device_id, n_used, artifact_uri, mse, run_id]], 
+#                                     columns=["device_id", "n_used", "model_path", "mse", "run_id"])
 
     return return_df 
 
@@ -134,6 +137,28 @@ def train_model(df_pandas: pd.DataFrame) -> pd.DataFrame:
 
 # COMMAND ----------
 
+with mlflow.start_run(run_name="test for fun") as run:
+    run_id = run.info.run_id
+
+    test_df = (df
+        .withColumn("run_id", f.lit(run_id)) # Add run_id
+        .groupby("device_id")
+    )
+
+display(test_df)
+
+# COMMAND ----------
+
+with mlflow.start_run(run_name="test for fun") as run:
+    run_id = run.info.run_id
+
+    test_df = (df
+        .withColumn("run_id", f.lit(run_id)))
+
+display(test_df)
+
+# COMMAND ----------
+
 with mlflow.start_run(run_name="Training session for all devices") as run:
     run_id = run.info.run_id
 
@@ -145,11 +170,8 @@ with mlflow.start_run(run_name="Training session for all devices") as run:
     )
 
 combined_df = df.join(model_directories_df, on="device_id", how="left")
-display(combined_df)
-
-# COMMAND ----------
-
 display(model_directories_df)
+display(combined_df)
 
 # COMMAND ----------
 

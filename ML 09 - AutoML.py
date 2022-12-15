@@ -83,6 +83,10 @@ print(summary.best_trial)
 
 # COMMAND ----------
 
+print(summary.best_trial.mlflow_run_id)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="3c0cd1ec-8965-4af3-896d-c30938033abf"/>
 # MAGIC 
 # MAGIC 

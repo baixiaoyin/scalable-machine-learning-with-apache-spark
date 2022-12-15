@@ -7,15 +7,6 @@
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC XY comments: <br>
-# MAGIC It looks like to me, one place (working dir) will have only one Parquet and Delta. And it comes with a _delta_log <br>
-# MAGIC Every change to the data (Parquet/Delta) will be logged in the _delta_log <br>
-# MAGIC But if you use overwrite, it will create a _delta_log for you in a directory <br>
-# MAGIC I am still confused about the two above, not very clear how to control where to write the Delta data, but somehow I strongly believe one dir one Delta table (one _delta_log) is true
-
-# COMMAND ----------
-
 # MAGIC %md <i18n value="fd2d84ac-6a17-44c2-bb92-18b0c7fef797"/>
 # MAGIC 
 # MAGIC 
@@ -51,19 +42,7 @@
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC 
-# MAGIC <div style="img align: center; line-height: 0; padding-top: 9px;">
-# MAGIC   <img src="https://dbc-b24345e8-120e.cloud.databricks.com/?o=3101139743428265#files/3075548951183145" width="500"/>
-# MAGIC </div>
-
-# COMMAND ----------
-
 # MAGIC %run "./Includes/Classroom-Setup" $reinstall = 'false'
-
-# COMMAND ----------
-
-DA.paths.working_dir
 
 # COMMAND ----------
 
@@ -116,30 +95,11 @@ airbnb_df.write.format("delta").mode("overwrite").saveAsTable("delta_review")
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC I assume the above one is to:
-# MAGIC 1. creat a database spark.sql(f"CREATE DATABASE IF NOT EXISTS {DA.cleaned_username}")
-# MAGIC 2. and tell the system that I am working this database spark.sql(f"USE {DA.cleaned_username}")
-
-# COMMAND ----------
-
-airbnb_df.write.format("delta").mode("overwrite").saveAsTable("test_test_test")
-
-# COMMAND ----------
-
 display(dbutils.fs.ls(DA.paths.working_dir))
 
 # COMMAND ----------
 
 display(dbutils.fs.ls(f"{DA.paths.working_dir}/_delta_log/"))
-
-# COMMAND ----------
-
-DA.paths.working_dir
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 
@@ -263,16 +223,8 @@ df_update.write.format("delta").mode("overwrite").save(DA.paths.working_dir)
 
 # COMMAND ----------
 
-df_update.write.format("delta").mode("overwrite").save(f"{DA.paths.working_dir}/xy_test/")
-
-# COMMAND ----------
-
 df = spark.read.format("delta").load(DA.paths.working_dir)
 display(df)
-
-# COMMAND ----------
-
-airbnb_df.write.format("delta").mode("overwrite").save(f"{DA.paths.working_dir}/xy_test/")
 
 # COMMAND ----------
 
@@ -281,10 +233,6 @@ airbnb_df.write.format("delta").mode("overwrite").save(f"{DA.paths.working_dir}"
 # COMMAND ----------
 
 DA.paths.working_dir
-
-# COMMAND ----------
-
-display(dbutils.fs.ls(f"{DA.paths.working_dir}/xy_test/"))
 
 # COMMAND ----------
 
@@ -365,6 +313,17 @@ display(df)
 
 # COMMAND ----------
 
+# Use your own timestamp 
+# time_stamp_string = "FILL_IN"
+
+# OR programatically get the first verion's timestamp value
+time_stamp_string = str(spark.sql("DESCRIBE HISTORY train_delta").collect()[-1]["timestamp"])
+
+df = spark.read.format("delta").option("timestampAsOf", time_stamp_string).load(DA.paths.working_dir)
+display(df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="6cbe5204-fe27-438a-af54-87492c2563b5"/>
 # MAGIC 
 # MAGIC 
@@ -402,6 +361,7 @@ from delta.tables import DeltaTable
 
 spark.conf.set("spark.databricks.delta.retentionDurationCheck.enabled", "false")
 delta_table = DeltaTable.forPath(spark, DA.paths.working_dir)
+print(delta_table)
 delta_table.vacuum(0)
 
 # COMMAND ----------

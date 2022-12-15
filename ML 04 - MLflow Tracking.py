@@ -126,6 +126,11 @@ with mlflow.start_run(run_name="LR-Single-Feature") as run:
 # COMMAND ----------
 
 from pyspark.ml.feature import RFormula
+import mlflow
+import mlflow.spark
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml import Pipeline
+from pyspark.ml.evaluation import RegressionEvaluator
 
 with mlflow.start_run(run_name="LR-All-Features") as run:
     # Create pipeline
@@ -164,7 +169,13 @@ with mlflow.start_run(run_name="LR-All-Features") as run:
 # COMMAND ----------
 
 from pyspark.sql.functions import col, log, exp
+from pyspark.ml.feature import RFormula
 import matplotlib.pyplot as plt
+import mlflow
+import mlflow.spark
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml import Pipeline
+from pyspark.ml.evaluation import RegressionEvaluator
 
 with mlflow.start_run(run_name="LR-Log-Price") as run:
     # Take log of price
@@ -242,7 +253,9 @@ client.list_experiments()
 
 # COMMAND ----------
 
-experiment_id = run.info.experiment_id
+import mlflow
+# experiment_id = run.info.experiment_id
+experiment_id = '012991babf4c4ed0bde380c5693d8ef4'
 runs_df = mlflow.search_runs(experiment_id)
 
 display(runs_df)
@@ -262,7 +275,15 @@ runs[0].data.metrics
 
 # COMMAND ----------
 
+runs[0]
+
+# COMMAND ----------
+
 runs[0].info.run_id
+
+# COMMAND ----------
+
+# run = runs[0]
 
 # COMMAND ----------
 
@@ -296,6 +317,10 @@ runs[0].info.run_id
 # MAGIC ### Load Saved Model
 # MAGIC 
 # MAGIC Let's practice <a href="https://www.mlflow.org/docs/latest/python_api/mlflow.spark.html" target="_blank">loading</a> our logged log-normal model.
+
+# COMMAND ----------
+
+# run.info.run_id
 
 # COMMAND ----------
 

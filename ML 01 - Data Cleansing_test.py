@@ -11,7 +11,7 @@
 # MAGIC 
 # MAGIC 
 # MAGIC 
-# MAGIC # Data Cleansing
+# MAGIC # Data Cleansing Test: This notebook is to test if XY master the contents, to pass the exam
 # MAGIC 
 # MAGIC We will be using Spark to do some exploratory data analysis & cleansing of the SF Airbnb rental dataset from <a href="http://insideairbnb.com/get-the-data.html" target="_blank">Inside Airbnb</a>.
 # MAGIC 
@@ -49,7 +49,8 @@ type(raw_df)
 
 from pyspark.sql.functions import col, rand
 
-raw_df.filter(col("price") == 0).count()
+### Write the code to filter the "price" when it is zero and return the number of lines that "price" is zero
+
 
 # COMMAND ----------
 
@@ -58,7 +59,8 @@ raw_df.filter(col("price") == 0).count()
 
 # COMMAND ----------
 
-raw_df.columns
+### Write the code to return all columns of raw_df
+
 
 # COMMAND ----------
 
@@ -97,9 +99,8 @@ columns_to_keep = [
     "price"
 ]
 
-base_df = raw_df.select(columns_to_keep)
-print(base_df.cache().count())
-display(base_df)
+### write the code to build a new df called base_df with only columns_to_keep, cache the data and return the number of raws of the base_df
+
 
 # COMMAND ----------
 
@@ -119,11 +120,13 @@ base_df.printSchema()
 
 # COMMAND ----------
 
+### delete the "$" in the column "price" and change the data type from str to double
 from pyspark.sql.functions import col, translate
 
-fixed_price_df = base_df.withColumn("price", translate(col("price"), "$,", "").cast("double"))
+### Start your code here
 
-display(fixed_price_df)
+### End your code here
+
 
 # COMMAND ----------
 
@@ -174,7 +177,8 @@ display(fixed_price_df.summary())
 
 # COMMAND ----------
 
-dbutils.data.summarize(fixed_price_df)
+### Very detailed sumarry of the fixed_price_df, including count missing mean stdev min max and even chart
+
 
 # COMMAND ----------
 
@@ -188,7 +192,9 @@ dbutils.data.summarize(fixed_price_df)
 
 # COMMAND ----------
 
-display(fixed_price_df.select("price").describe())
+### display the high level summary: count mean stddev min max
+
+
 
 # COMMAND ----------
 
@@ -214,7 +220,8 @@ fixed_price_df.filter(col("price") == 0).count()
 
 # COMMAND ----------
 
-pos_prices_df = fixed_price_df.filter(col("price") > 0)
+### To keep only rows with "price" > 0
+
 
 # COMMAND ----------
 
@@ -230,28 +237,14 @@ display(pos_prices_df.select("minimum_nights").describe())
 
 # COMMAND ----------
 
-display(pos_prices_df
-        .groupBy("minimum_nights").count()
-        .orderBy(col("count").desc(), col("minimum_nights")) ### what the hell is the ", col("minimum_nights)"?? seems not nesseasry.. see next line
-       )
+### Group by "minimum_nights" get counts and order desc by counts
+
 
 # COMMAND ----------
 
-display(pos_prices_df
-        .groupBy("minimum_nights").count()
-        .orderBy(col("count").desc())
-       )
+### Group by "minimum_nights" get counts and order desc by "minimun_nights"
 
-# COMMAND ----------
 
-display(pos_prices_df
-        .groupBy("minimum_nights").count()
-        .orderBy(col("minimum_nights").desc(), col("minimum_nights"))
-       )
-
-# COMMAND ----------
-
-type(pos_prices_df.groupBy("minimum_nights").count())
 
 # COMMAND ----------
 
@@ -260,14 +253,7 @@ type(pos_prices_df.groupBy("minimum_nights").count())
 
 # COMMAND ----------
 
-test_df = pos_prices_df.groupBy("minimum_nights")
-
-# COMMAND ----------
-
-from pyspark.sql import functions as F
-display(test_df.agg(F.avg("price").alias("price_count"),\
-                   F.count("minimum_nights").alias("min_nights_count"))
-        .orderBy(col("min_nights_count").desc(), col("min_nights_count")))
+### Answer the question above 
 
 # COMMAND ----------
 
@@ -283,9 +269,9 @@ pos_prices_df.printSchema()
 
 # COMMAND ----------
 
-min_nights_df = pos_prices_df.filter(col("minimum_nights") <= 365)
+### Keep the rows with only "minimum_nights" fewer than 365
 
-display(min_nights_df)
+
 
 # COMMAND ----------
 
@@ -322,17 +308,11 @@ display(min_nights_df)
 
 # COMMAND ----------
 
-from pyspark.sql.functions import col
-from pyspark.sql.types import IntegerType
+### Change all integer columns to double
 
-integer_columns = [x.name for x in min_nights_df.schema.fields if x.dataType == IntegerType()]
-doubles_df = min_nights_df
+# from pyspark.sql.functions import col
+# from pyspark.sql.types import IntegerType
 
-for c in integer_columns:
-    doubles_df = doubles_df.withColumn(c, col(c).cast("double"))
-
-columns = "\n - ".join(integer_columns)
-print(f"Columns converted from Integer to Double:\n - {columns}")
 
 # COMMAND ----------
 
@@ -344,23 +324,9 @@ print(f"Columns converted from Integer to Double:\n - {columns}")
 
 # COMMAND ----------
 
-from pyspark.sql.functions import when
+### Get the list of columns with Null value
+# from pyspark.sql.functions import when
 
-impute_cols = [
-    "bedrooms",
-    "bathrooms",
-    "beds", 
-    "review_scores_rating",
-    "review_scores_accuracy",
-    "review_scores_cleanliness",
-    "review_scores_checkin",
-    "review_scores_communication",
-    "review_scores_location",
-    "review_scores_value"
-]
-
-for c in impute_cols:
-    doubles_df = doubles_df.withColumn(c + "_na", when(col(c).isNull(), 1.0).otherwise(0.0))
 
 # COMMAND ----------
 
@@ -382,12 +348,10 @@ display(doubles_df.describe())
 
 # COMMAND ----------
 
-from pyspark.ml.feature import Imputer
+### Fill all columns with Null with "mdeian" value
+# from pyspark.ml.feature import Imputer
 
-imputer = Imputer(strategy="median", inputCols=impute_cols, outputCols=impute_cols)
 
-imputer_model = imputer.fit(doubles_df)
-imputed_df = imputer_model.transform(doubles_df)
 
 # COMMAND ----------
 
@@ -403,7 +367,7 @@ display(imputed_df.sample(0.01))
 
 # COMMAND ----------
 
-imputed_df.write.format("delta").mode("overwrite").save(f"{DA.paths.working_dir}/imputed_results")
+### Save the imputed df 
 
 # COMMAND ----------
 

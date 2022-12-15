@@ -179,6 +179,16 @@ best_hyperparam
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Regarding to trials, please see the line of code below or <br> 
+# MAGIC http://hyperopt.github.io/hyperopt/getting-started/minimizing_functions/#the-trials-object
+
+# COMMAND ----------
+
+trials.trials
+
+# COMMAND ----------
+
 # Retrain model on train & validation dataset and evaluate on test dataset
 with mlflow.start_run():
     best_max_depth = best_hyperparam["max_depth"]
@@ -195,6 +205,55 @@ with mlflow.start_run():
     mlflow.log_param("numTrees", best_num_trees)
     mlflow.log_metric("rmse", rmse)
     mlflow.spark.log_model(pipeline_model, "model")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##　Can we use CV here as well? Still on going...
+
+# COMMAND ----------
+
+file_path = f"{DA.paths.datasets}/airbnb/sf-listings/sf-listings-2019-03-06-clean.delta/"
+airbnb_df = spark.read.format("delta").load(file_path)
+train_df, test_df = airbnb_df.randomSplit([.8, .2], seed=42)
+
+# COMMAND ----------
+
+from pyspark.ml.feature import StringIndexer, VectorAssembler
+from pyspark.ml import Pipeline
+from pyspark.ml.regression import RandomForestRegressor
+from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.ml.tuning import CrossValidator
+
+categorical_cols = [field for (field, dataType) in train_df.dtypes if dataType == "string"]
+index_output_cols = [x + "Index" for x in categorical_cols]
+
+string_indexer = StringIndexer(inputCols=categorical_cols, outputCols=index_output_cols, handleInvalid="skip")
+
+numeric_cols = [field for (field, dataType) in train_df.dtypes if ((dataType == "double") & (field != "price"))]
+assembler_inputs = index_output_cols + numeric_cols
+vec_assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features")
+rf = RandomForestRegressor(labelCol="price", maxBins=40, seed=42)
+regression_evaluator = RegressionEvaluator(predictionCol="prediction", labelCol="price")
+
+# cv = CrossValidator(estimator=rf, evaluator=regression_evaluator, estimatorParamMaps=param_grid, 
+#                     numFolds=3, parallelism=4, seed=42)
+
+cv = CrossValidator(estimator=rf, evaluator=regression_evaluator, 
+                    numFolds=3, parallelism=4, seed=42)
+
+stages_with_cv = [string_indexer, vec_assembler, cv]
+pipeline = Pipeline(stages=stages_with_cv)
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ###To be continued...
 
 # COMMAND ----------
 

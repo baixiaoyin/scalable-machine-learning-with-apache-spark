@@ -88,6 +88,19 @@ ohe_encoder = OneHotEncoder(inputCols=index_output_cols, outputCols=ohe_output_c
 
 # COMMAND ----------
 
+indexed_df = string_indexer.fit(train_df).transform(train_df)
+
+# COMMAND ----------
+
+display(indexed_df)
+
+# COMMAND ----------
+
+onehot_df = ohe_encoder.fit(indexed_df).transform(indexed_df)
+display(onehot_df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="dedd7980-1c27-4f35-9d94-b0f1a1f92839"/>
 # MAGIC 
 # MAGIC 
@@ -151,6 +164,44 @@ pipeline_model = pipeline.fit(train_df)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Let's see the pipelines step by step
+
+# COMMAND ----------
+
+string_train_df = string_indexer.fit(train_df).transform(train_df)
+
+# COMMAND ----------
+
+display(string_train_df)
+
+# COMMAND ----------
+
+one_train_df = ohe_encoder.fit(string_train_df).transform(string_train_df)
+
+# COMMAND ----------
+
+display(one_train_df)
+
+# COMMAND ----------
+
+one_train_df.printSchema()
+
+# COMMAND ----------
+
+vec_train_df = vec_assembler.transform(one_train_df)
+display(vec_train_df)
+
+# COMMAND ----------
+
+vec_train_df.printSchema()
+
+# COMMAND ----------
+
+model = lr.fit(vec_train_df)
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="c7420125-24be-464f-b609-1bb4e765d4ff"/>
 # MAGIC 
 # MAGIC 
@@ -194,6 +245,39 @@ saved_pipeline_model = PipelineModel.load(DA.paths.working_dir)
 pred_df = saved_pipeline_model.transform(test_df)
 
 display(pred_df.select("features", "price", "prediction"))
+
+# COMMAND ----------
+
+str_test_df = string_indexer.fit(test_df).transform(test_df)
+ohe_test_df = ohe_encoder.fit(str_test_df).transform(str_test_df)
+vec_test_df = vec_assembler.transform(ohe_test_df)
+# pred_df_new = model.transform(vec_test_df)
+
+# display(pred_df_new.select("features", "price", "prediction"))
+
+# COMMAND ----------
+
+display(test_df)
+
+# COMMAND ----------
+
+pred_df_new = model.transform(vec_train_df)
+
+# COMMAND ----------
+
+pred_df_Test_new = model.transform(vec_test_df)
+
+# COMMAND ----------
+
+display(pred_df_Test_new)
+
+# COMMAND ----------
+
+display(pred_df_new)
+
+# COMMAND ----------
+
+vec_test_df.printSchema()
 
 # COMMAND ----------
 

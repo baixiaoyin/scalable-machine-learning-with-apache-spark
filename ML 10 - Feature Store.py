@@ -64,9 +64,19 @@ display(airbnb_df)
 
 # COMMAND ----------
 
-spark.sql(f"CREATE DATABASE IF NOT EXISTS {DA.cleaned_username}")
+spark.sql(f"CREATE DATABASE IF NOT EXISTS {DA.cleaned_username}") 
+### creat a database with the username if such a database not exit 
 table_name = f"{DA.cleaned_username}.airbnb_" + str(uuid.uuid4())[:6]
+### creat the table name with <database_name>.<table_name>
 print(table_name)
+
+# COMMAND ----------
+
+table_name
+
+# COMMAND ----------
+
+table_name = "xiaoyin_bai.airbnb_195e70"
 
 # COMMAND ----------
 
@@ -78,6 +88,7 @@ print(table_name)
 
 # COMMAND ----------
 
+from databricks import feature_store
 fs = feature_store.FeatureStoreClient()
 # help(fs.create_table)
 
@@ -105,6 +116,10 @@ fs = feature_store.FeatureStoreClient()
 numeric_cols = [x.name for x in airbnb_df.schema.fields if (x.dataType == DoubleType()) and (x.name != "price")]
 numeric_features_df = airbnb_df.select(["index"] + numeric_cols)
 display(numeric_features_df)
+
+# COMMAND ----------
+
+numeric_features_df.printSchema()
 
 # COMMAND ----------
 
@@ -217,6 +232,46 @@ display(inference_data_df)
 # MAGIC Build a training dataset that will use the indicated "key" to lookup features from the feature table and also the online feature **`score_diff_from_last_month`**. We will use <a href="https://docs.databricks.com/dev-tools/api/python/latest/index.html" target="_blank">FeatureLookup</a> and if you specify no features, it will return all of them except the primary key.
 
 # COMMAND ----------
+
+from databricks.feature_store import feature_table, FeatureLookup
+
+model_feature_lookups = [FeatureLookup(table_name=table_name, lookup_key='index')]
+
+# COMMAND ----------
+
+model_feature_lookups
+
+# COMMAND ----------
+
+training_set = fs.create_training_set(inference_data_df, model_feature_lookups, label="price", exclude_columns="index")
+
+# COMMAND ----------
+
+training_set
+
+# COMMAND ----------
+
+type(training_set)
+
+# COMMAND ----------
+
+training_pd = training_set.load_df().toPandas()
+
+# COMMAND ----------
+
+type(training_pd)
+
+# COMMAND ----------
+
+training_pd.columns
+
+# COMMAND ----------
+
+train_df_temp = spark.sql("SELECT * FROM xiaoyin_bai.airbnb_44f67e")
+
+# COMMAND ----------
+
+from databricks.feature_store import feature_table, FeatureLookup
 
 def load_data(table_name, lookup_key):
     model_feature_lookups = [FeatureLookup(table_name=table_name, lookup_key=lookup_key)]
@@ -520,3 +575,34 @@ display(predictions_df)
 # MAGIC Apache, Apache Spark, Spark and the Spark logo are trademarks of the <a href="https://www.apache.org/">Apache Software Foundation</a>.<br/>
 # MAGIC <br/>
 # MAGIC <a href="https://databricks.com/privacy-policy">Privacy Policy</a> | <a href="https://databricks.com/terms-of-use">Terms of Use</a> | <a href="https://help.databricks.com/">Support</a>
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## XY test: how to use fs (feature store client) to collect meta data
+
+# COMMAND ----------
+
+from databricks import feature_store
+fs = feature_store.FeatureStoreClient()
+# help(fs.create_table)
+
+# COMMAND ----------
+
+table_name = "xiaoyin_bai.airbnb_195e70"
+
+# COMMAND ----------
+
+fs.get_table(table_name).description
+
+# COMMAND ----------
+
+fs.get_table(table_name)
+
+# COMMAND ----------
+
+display(fs.read_table(table_name))
+
+# COMMAND ----------
+
+

@@ -7,6 +7,34 @@
 
 # COMMAND ----------
 
+# MAGIC %run "./Includes/Classroom-Setup" $reinstall = "false"
+
+# COMMAND ----------
+
+display(dbutils.fs.ls(f"{DA.paths.working_dir}/imputed_results"))
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
 # MAGIC %md <i18n value="8c6d3ef3-e44b-4292-a0d3-1aaba0198525"/>
 # MAGIC 
 # MAGIC 
@@ -232,14 +260,7 @@ display(pos_prices_df.select("minimum_nights").describe())
 
 display(pos_prices_df
         .groupBy("minimum_nights").count()
-        .orderBy(col("count").desc(), col("minimum_nights")) ### what the hell is the ", col("minimum_nights)"?? seems not nesseasry.. see next line
-       )
-
-# COMMAND ----------
-
-display(pos_prices_df
-        .groupBy("minimum_nights").count()
-        .orderBy(col("count").desc())
+        .orderBy(col("count").desc(), col("minimum_nights"))
        )
 
 # COMMAND ----------
